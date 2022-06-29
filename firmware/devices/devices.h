@@ -36,12 +36,6 @@
 #ifndef DEVICES_H_
 #define DEVICES_H_
 
-#include "radio/radio.h"
-#include "leds/leds.h"
-#include "antenna/antenna.h"
-#include "temp_sensor/temp_sensor.h"
-#include "power_sensor/power_sensor.h"
-#include "media/media.h"
 #include "watchdog/watchdog.h"
 
 #endif /* DEVICES_H_ */

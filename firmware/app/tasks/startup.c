@@ -39,12 +39,6 @@
 #include <system/sys_log/sys_log.h>
 #include <system/clocks.h>
 #include <devices/watchdog/watchdog.h>
-#include <devices/leds/leds.h>
-#include <devices/radio/radio.h>
-#include <devices/power_sensor/power_sensor.h>
-#include <devices/temp_sensor/temp_sensor.h>
-#include <devices/antenna/antenna.h>
-#include <devices/media/media.h>
 
 #include <ngham/ngham.h>
 
@@ -93,8 +87,6 @@ void vTaskStartup(void)
         sys_log_print_uint(error_counter);
         sys_log_print_msg(" ERROR(S)!");
         sys_log_new_line();
-
-        led_set(LED_FAULT);
     }
     else
     {
