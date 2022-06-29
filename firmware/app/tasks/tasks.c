@@ -48,6 +48,7 @@
 #include "beacon.h"
 #include "uplink.h"
 #include "time_control.h"
+#include "testbench.h"
 
 void create_tasks(void)
 {
@@ -60,6 +61,15 @@ void create_tasks(void)
         /* Error creating the startup task */
     }
 #endif /* CONFIG_TASK_STARTUP_ENABLED */
+
+#if defined(CONFIG_TASK_STARTUP_ENABLED) && (CONFIG_TASK_STARTUP_ENABLED == 1)
+    xTaskCreate(vTaskTestBench, TASK_TESTBENCH_NAME, TASK_TESTBENCH_STACK_SIZE, NULL, TASK_TESTBENCH_PRIORITY, &xTaskTestBenchHandle);
+
+    if (xTaskTimeControlHandle == NULL)
+    {
+        /* Error creating the time control task */
+    }
+#endif /* CONFIG_TASK_BEACON_ENABLED */
 
     /* Watchdog reset task */
 #if defined(CONFIG_TASK_STARTUP_ENABLED) && (CONFIG_TASK_STARTUP_ENABLED == 1)
