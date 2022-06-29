@@ -87,46 +87,6 @@ void vTaskStartup(void)
     sys_log_print_hex(system_get_reset_cause());
     sys_log_new_line();
 
-    /* Internal non-volatile memory initialization */
-    if (media_init(MEDIA_INT_FLASH) != 0)
-    {
-        error_counter++;
-    }
-
-    /* LEDs device initialization */
-    if (leds_init() != 0)
-    {
-        error_counter++;
-    }
-
-    /* Power sensor device initialization */
-    if (power_sensor_init() != 0)
-    {
-        error_counter++;
-    }
-
-    /* Temperature sensor device initialization */
-    if (temp_sensor_init() != 0)
-    {
-        error_counter++;
-    }
-
-    /* Radio device initialization */
-    if (radio_init() != 0)
-    {
-        error_counter++;
-    }
-
-    /* NGHam initialization */
-    ngham_init_arrays();
-    ngham_init();
-
-    /* Antenna device initialization */
-    if (antenna_init() != 0)
-    {
-        error_counter++;
-    }
-
     if (error_counter > 0U)
     {
         sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_STARTUP_NAME, "Boot completed with ");
@@ -141,7 +101,6 @@ void vTaskStartup(void)
         sys_log_print_event_from_module(SYS_LOG_INFO, TASK_STARTUP_NAME, "Boot completed with SUCCESS!");
         sys_log_new_line();
 
-        led_clear(LED_FAULT);
     }
 
     /* Startup task status = Done */
