@@ -42,11 +42,6 @@
 
 #include <drivers/i2c/i2c.h>
 
-/* I2C configuration */
-#define INA22X_I2C_PORT                 I2C_PORT_2
-#define INA22X_I2C_CLOCK_HZ             100000
-#define INA22X_I2C_SLAVE_ADDRESS        4
-
 /* Registers */
 #define INA22X_REG_CONFIGURATION        0x00    /**< Configuration register. */
 #define INA22X_REG_SHUNT_VOLTAGE        0x01    /**< Shunt voltage register. */
@@ -169,6 +164,7 @@ typedef struct
 {
     i2c_port_t i2c_port;
     i2c_config_t i2c_conf;
+    i2c_slave_adr_t i2c_adr;
     ina22x_averaging_mode_t avg_mode;
     ina22x_bus_voltage_conv_time_t bus_voltage_conv_time;
     ina22x_shunt_voltage_conv_time_t shunt_voltage_conv_time;

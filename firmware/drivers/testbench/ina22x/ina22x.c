@@ -43,7 +43,7 @@ int ina22x_init(ina22x_config_t config)
 {
     int err = -1;
 
-    if (i2c_init(INA22X_I2C_PORT, config.i2c_conf) == 0)
+    if (i2c_init(config.i2c_port, config.i2c_conf) == 0)
     {
         /* Sets ina22x to default */
         if (ina22x_write_reg(config, INA22X_REG_CONFIGURATION, 0x8000) == 0)
@@ -119,7 +119,7 @@ int ina22x_write_reg(ina22x_config_t config, ina22x_reg_t reg, uint16_t val)
     buf[1] = val >> 8;
     buf[2] = val & (uint16_t) 0xFF;
 
-    if (i2c_write(config.i2c_port, INA22X_I2C_SLAVE_ADDRESS, buf, 3) != 0)
+    if (i2c_write(config.i2c_port, config.i2c_adr, buf, 3) != 0)
     {
     #if defined(CONFIG_DRIVERS_DEBUG_ENABLED) && (CONFIG_DRIVERS_DEBUG_ENABLED == 1)
         sys_log_print_event_from_module(SYS_LOG_ERROR, INA22X_MODULE_NAME, "Error during ina22x write reg function: Could not write register!");
@@ -136,9 +136,9 @@ int ina22x_read_reg(ina22x_config_t config, ina22x_reg_t reg, uint16_t *val)
     uint8_t buf[2];
 
     int err = -1;
-    if (i2c_write(config.i2c_port, INA22X_I2C_SLAVE_ADDRESS, &reg, 1) == 0)
+    if (i2c_write(config.i2c_port, config.i2c_adr, &reg, 1) == 0)
     {
-        if (i2c_read(config.i2c_port, INA22X_I2C_SLAVE_ADDRESS, buf, 2) == 0)
+        if (i2c_read(config.i2c_port, config.i2c_adr, buf, 2) == 0)
         {
             err = 0;
             *val = ((uint16_t)buf[0] << 8) | buf[1];
