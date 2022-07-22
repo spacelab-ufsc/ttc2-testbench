@@ -70,7 +70,7 @@ typedef enum
 typedef enum
 {
     INA22X_AVERAGING_MODE_1=0X0000,             /**< 1 average sample. */
-    INA22X_AVERAGING_MODE_4=0X0200,             /**< 4 average samples. */
+    INA22X_AVERAGING_MODE_4,                    /**< 4 average samples. */
     INA22X_AVERAGING_MODE_16,                   /**< 16 average samples. */
     INA22X_AVERAGING_MODE_64,                   /**< 64 average samples. */
     INA22X_AVERAGING_MODE_128,                  /**< 128 average samples. */
@@ -85,7 +85,7 @@ typedef enum
 typedef enum
 {
     INA22X_BUS_VOLTAGE_CONV_TIME_140u=0X0000,   /**< Bus Voltage Conversion Time 140u. */
-    INA22X_BUS_VOLTAGE_CONV_TIME_204u=0X0040,   /**< Bus Voltage Conversion Time 204u. */
+    INA22X_BUS_VOLTAGE_CONV_TIME_204u,          /**< Bus Voltage Conversion Time 204u. */
     INA22X_BUS_VOLTAGE_CONV_TIME_332u,          /**< Bus Voltage Conversion Time 332u. */
     INA22X_BUS_VOLTAGE_CONV_TIME_588u,          /**< Bus Voltage Conversion Time 588u. */
     INA22X_BUS_VOLTAGE_CONV_TIME_1100u,         /**< Bus Voltage Conversion Time 1100u. */
@@ -100,7 +100,7 @@ typedef enum
 typedef enum
 {
     INA22X_SHUNT_VOLTAGE_CONV_TIME_140u=0X0000, /**< Shunt Voltage Conversion Time 140u. */
-    INA22X_SHUNT_VOLTAGE_CONV_TIME_204u=0X0008, /**< Shunt Voltage Conversion Time 204u. */
+    INA22X_SHUNT_VOLTAGE_CONV_TIME_204u,        /**< Shunt Voltage Conversion Time 204u. */
     INA22X_SHUNT_VOLTAGE_CONV_TIME_332u,        /**< Shunt Voltage Conversion Time 332u. */
     INA22X_SHUNT_VOLTAGE_CONV_TIME_588u,        /**< Shunt Voltage Conversion Time 588u. */
     INA22X_SHUNT_VOLTAGE_CONV_TIME_1100u,       /**< Shunt Voltage Conversion Time 1100u. */
@@ -114,11 +114,11 @@ typedef enum
  */
 typedef enum
 {
-    INA22X_MODE_SHUTDOWN=0,                     /**< Power-Down (or Shutdown). */
-    INA22X_MODE_SHUNT_TRIG=0X001,               /**< Shunt Voltage, Triggered. */
+    INA22X_MODE_SHUTDOWN_1=0X0000,              /**< Power-Down (or Shutdown). */
+    INA22X_MODE_SHUNT_TRIG,                     /**< Shunt Voltage, Triggered. */
     INA22X_MODE_BUS_TRIG,                       /**< Bus Voltage, Triggered. */
-    INA22X_MODE_SHUTDOWN_2,                     /**< Power-Down (or Shutdown). */
     INA22X_MODE_SHUNT_BUS_TRIG,                 /**< Shunt and Bus, Triggered. */
+    INA22X_MODE_SHUTDOWN_2,                     /**< Power-Down (or Shutdown). */
     INA22X_MODE_SHUNT_CONT,                     /**< Shunt Voltage, Continuous. */
     INA22X_MODE_BUS_CONT,                       /**< Bus Voltage, Continuous. */
     INA22X_MODE_SHUNT_BUS_CONT,                 /**< Shunt and Bus, Continuous. */
@@ -142,7 +142,7 @@ typedef uint8_t ina22x_reg_t;
  * \brief INA22x current, voltage and power types.
  */
 typedef int16_t ina22x_current_t;
-typedef int16_t ina22x_voltage_t;
+typedef float ina22x_voltage_t;
 typedef int16_t ina22x_power_t;
 
 /**
@@ -158,7 +158,7 @@ typedef float ina22x_lsb_current_t;
 /**
  * \brief INA22x calibration value.
  */
-typedef uint16_t ina22x_cal_value_t;
+typedef float ina22x_cal_value_t;
 
 typedef struct
 {

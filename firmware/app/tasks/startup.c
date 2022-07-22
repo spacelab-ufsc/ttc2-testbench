@@ -53,20 +53,20 @@ void vTaskStartup(void)
     unsigned int error_counter = 0;
 
     /* Logger device initialization */
-    sys_log_init();
+    //sys_log_init();
 
     /* Print the FreeRTOS version */
-    sys_log_print_event_from_module(SYS_LOG_INFO, TASK_STARTUP_NAME, "FreeRTOS ");
+    /*sys_log_print_event_from_module(SYS_LOG_INFO, TASK_STARTUP_NAME, "FreeRTOS ");
     sys_log_print_msg(tskKERNEL_VERSION_NUMBER);
     sys_log_new_line();
-
+*/
     /* Print the hardware version */
-    sys_log_print_event_from_module(SYS_LOG_INFO, TASK_STARTUP_NAME, "Hardware revision is ");
+  /*  sys_log_print_event_from_module(SYS_LOG_INFO, TASK_STARTUP_NAME, "Hardware revision is ");
     sys_log_print_uint(system_get_hw_version());
     sys_log_new_line();
-
+*/
     /* Print the system clocks */
-    clocks_config_t clks = clocks_read();
+ /*   clocks_config_t clks = clocks_read();
     sys_log_print_event_from_module(SYS_LOG_INFO, TASK_STARTUP_NAME, "System clocks: MCLK=");
     sys_log_print_uint(clks.mclk_hz);
     sys_log_print_msg(" Hz, SMCLK=");
@@ -75,25 +75,26 @@ void vTaskStartup(void)
     sys_log_print_uint(clks.aclk_hz);
     sys_log_print_msg(" Hz");
     sys_log_new_line();
-
+*/
     /* Print last reset cause (code) */
+  /*
     sys_log_print_event_from_module(SYS_LOG_INFO, TASK_STARTUP_NAME, "Last reset cause: ");
     sys_log_print_hex(system_get_reset_cause());
     sys_log_new_line();
+*/
+   // if (error_counter > 0U)
+    //{
+       // sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_STARTUP_NAME, "Boot completed with ");
+       // sys_log_print_uint(error_counter);
+        //sys_log_print_msg(" ERROR(S)!");
+        //sys_log_new_line();
+    //}
+    //else
+    //{
+      //  sys_log_print_event_from_module(SYS_LOG_INFO, TASK_STARTUP_NAME, "Boot completed with SUCCESS!");
+        //sys_log_new_line();
 
-    if (error_counter > 0U)
-    {
-        sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_STARTUP_NAME, "Boot completed with ");
-        sys_log_print_uint(error_counter);
-        sys_log_print_msg(" ERROR(S)!");
-        sys_log_new_line();
-    }
-    else
-    {
-        sys_log_print_event_from_module(SYS_LOG_INFO, TASK_STARTUP_NAME, "Boot completed with SUCCESS!");
-        sys_log_new_line();
-
-    }
+    //}
 
     /* Startup task status = Done */
     xEventGroupSetBits(task_startup_status, TASK_STARTUP_DONE);

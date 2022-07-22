@@ -40,9 +40,12 @@ xTaskHandle xTaskTestBenchHandle;
 
 void vTaskTestBench(void)
 {
-    WDTCTL = WDTPW | WDTHOLD;   // stop watchdog timer
+    while(1)
+    {
 
-    ina22x_config_t config;
+    }
+}
+    /*ina22x_config_t config;
     config.i2c_port = INA22X_I2C_PORT;
     config.i2c_conf.speed_hz = INA22X_I2C_CLOCK_HZ;
     config.avg_mode = INA22X_AVERAGING_MODE_1;
@@ -83,57 +86,57 @@ void vTaskTestBench(void)
 
 
     while(1)
-    {
+    {*/
         /* Read Manufacturer ID */
-       ina22x_get_manufacturer_id(config, &sensor_man_id);
+      // ina22x_get_manufacturer_id(config, &sensor_man_id);
 
        /* Read Die ID */
-       ina22x_get_die_id(config, &sensor_die_id);
+       //ina22x_get_die_id(config, &sensor_die_id);
 
        /* Initialize the ina22x */
-       ina22x_init(config);
+       //ina22x_init(config);
 
        /* Configure sensor */
-       ina22x_configuration(config);
+       //ina22x_configuration(config);
 
-       ina22x_configuration(config_2);
+       //ina22x_configuration(config_2);
 
        /* Calibrate sensor to uC measurements*/
-       ina22x_calibration(config_2);
+       //ina22x_calibration(config_2);
 
        /* Read Configuration Register */
-       ina22x_read_reg(config_2, INA22X_REG_CONFIGURATION, &config_reg_val);
+       //ina22x_read_reg(config_2, INA22X_REG_CONFIGURATION, &config_reg_val);
 
        /* Read Calibration Register */
-       ina22x_read_reg(config_2, INA22X_REG_CALIBRATION, &cal_reg_val);
+       //ina22x_read_reg(config_2, INA22X_REG_CALIBRATION, &cal_reg_val);
 
        /* Read all measurements Registers */
 
-       ina22x_read_reg(config_2, INA22X_REG_POWER, &power_reg_val);
+       //ina22x_read_reg(config_2, INA22X_REG_POWER, &power_reg_val);
 
-       ina22x_read_reg(config_2, INA22X_REG_CURRENT, &current_reg_val);
+       //ina22x_read_reg(config_2, INA22X_REG_CURRENT, &current_reg_val);
 
-       ina22x_read_reg(config_2, INA22X_REG_BUS_VOLTAGE, &bus_vol_reg_val);
+       //ina22x_read_reg(config_2, INA22X_REG_BUS_VOLTAGE, &bus_vol_reg_val);
 
-       ina22x_read_reg(config_2, INA22X_REG_SHUNT_VOLTAGE, &shunt_vol_reg_val);
+       //ina22x_read_reg(config_2, INA22X_REG_SHUNT_VOLTAGE, &shunt_vol_reg_val);
 
        /* Read all raw measurements with functions */
 
-       ina22x_get_current_raw(config, &cur);
+       //ina22x_get_current_raw(config, &cur);
 
-       ina22x_get_voltage_raw(config_2, INA22X_SHUNT_VOLTAGE, &volt);
+       //ina22x_get_voltage_raw(config_2, INA22X_SHUNT_VOLTAGE, &volt);
 
-       ina22x_get_power_raw(config_2, &pwr);
+       //ina22x_get_power_raw(config_2, &pwr);
 
        /* Read measurements in mili */
 
-       ina22x_get_current_mA(config_2, &mcur);
+       //ina22x_get_current_mA(config_2, &mcur);
 
-       ina22x_get_voltage_mV(config_2, INA22X_SHUNT_VOLTAGE, &mvolt);
+       //ina22x_get_voltage_mV(config_2, INA22X_SHUNT_VOLTAGE, &mvolt);
 
-       ina22x_get_power_mW(config_2, &mpwr);
+       //ina22x_get_power_mW(config_2, &mpwr);
 
-    }
-}
+    //}
+//}
 
 /** \} End of testbench group */

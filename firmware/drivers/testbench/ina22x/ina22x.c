@@ -34,6 +34,8 @@
  * \{
  */
 
+#include <math.h>
+
 #include <system/sys_log/sys_log.h>
 #include <drivers/i2c/i2c.h>
 
@@ -74,10 +76,11 @@ int ina22x_configuration(ina22x_config_t config)
     int err = -1;
     uint16_t config_mask = 0x0000;
 
-    config_mask |= config.avg_mode;
-    config_mask |= config.bus_voltage_conv_time;
-    config_mask |= config.shunt_voltage_conv_time;
-    config_mask |= config.op_mode;
+    config_mask |= (config.avg_mode << 9);                /* Bits [11:9] */
+    config_mask |= (config.bus_voltage_conv_time << 6);   /* Bits [8:6] */
+    config_mask |= (config.shunt_voltage_conv_time << 3); /* Bits [5:3] */
+    config_mask |= config.op_mode;                        /* Bits [2:0] */
+
 
     if (ina22x_write_reg(config, INA22X_REG_CONFIGURATION, config_mask) == 0)
     {
@@ -97,8 +100,13 @@ int ina22x_configuration(ina22x_config_t config)
 int ina22x_calibration(ina22x_config_t config)
 {
     int err = 0;
+    uint16_t calib_reg = 0;
 
-    if (ina22x_write_reg(config, INA22X_REG_CALIBRATION, config.cal) == -1)
+    calib_reg = (uint16_t) config.cal;
+
+    //config.lsb_current = 0.00512 /(0.1 * (float) calib_reg);
+
+    if (ina22x_write_reg(config, INA22X_REG_CALIBRATION, calib_reg) == -1)
     {
     #if defined(CONFIG_DRIVERS_DEBUG_ENABLED) && (CONFIG_DRIVERS_DEBUG_ENABLED == 1)
         sys_log_print_event_from_module(SYS_LOG_ERROR, INA22X_MODULE_NAME, "Error during ina22x calibration: Could not write register!");
@@ -114,7 +122,7 @@ int ina22x_write_reg(ina22x_config_t config, ina22x_reg_t reg, uint16_t val)
 {
     int err = 0;
 
-    uint8_t buf[3];
+    uint8_t buf[3] = 0;
     buf[0] = reg;
     buf[1] = val >> 8;
     buf[2] = val & (uint16_t) 0xFF;
@@ -259,8 +267,8 @@ ina22x_voltage_t ina22x_convert_raw_to_mV(ina22x_config_t config, ina22x_voltage
 
     switch(device)
     {
-        case INA22X_BUS_VOLTAGE:      voltage = volt * 1.25e-3;    break;
-        case INA22X_SHUNT_VOLTAGE:    voltage = volt * 2.5e-6;     break;
+        case INA22X_BUS_VOLTAGE:      voltage = (float) volt * 1.25e-3;    break;
+        case INA22X_SHUNT_VOLTAGE:    voltage = (float) volt * 2.5e-6;     break;
         default:
         #if defined(CONFIG_DRIVERS_DEBUG_ENABLED) && (CONFIG_DRIVERS_DEBUG_ENABLED == 1)
             sys_log_print_event_from_module(SYS_LOG_ERROR, INA22X_MODULE_NAME, "Error during ina22x get voltage in volts, invalid device!");
