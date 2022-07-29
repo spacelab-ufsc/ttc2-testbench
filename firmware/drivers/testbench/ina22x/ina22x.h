@@ -28,7 +28,7 @@
  * 
  * \version 0.2.1
  * 
- * \date 2022/06/01
+ * \date 2022/07/29
  * 
  * \defgroup ina22x INA22x
  * \ingroup drivers
@@ -42,27 +42,22 @@
 
 #include <drivers/i2c/i2c.h>
 
-/* Registers */
-#define INA22X_REG_CONFIGURATION        0x00    /**< Configuration register. */
-#define INA22X_REG_SHUNT_VOLTAGE        0x01    /**< Shunt voltage register. */
-#define INA22X_REG_BUS_VOLTAGE          0x02    /**< Bus voltage register. */
-#define INA22X_REG_POWER                0x03    /**< Power register. */
-#define INA22X_REG_CURRENT              0x04    /**< Current register. */
-#define INA22X_REG_CALIBRATION          0x05    /**< Calibration register. */
-#define INA22X_REG_MASK_ENABLE          0x06    /**< Mask/Enable register. */
-#define INA22X_REG_ALERT_LIMIT          0x07    /**< Alert limit register. */
-#define INA22X_REG_MANUFACTURER_ID      0xFE    /**< Manufacturer ID register. */
-#define INA22X_REG_DIE_ID               0xFF    /**< Die ID register. */
-
-/* Calibration values */
+/**
+ * \brief INA22x read/write registers.
+ */
 typedef enum
 {
-    INA22X_CAL_UC=0,                            /**< Calibration values for uC */
-    INA22X_CAL_RADIO,                           /**< Calibration values for radio */
-} ina22x_cal_device_t;
-
-
-/* Configuration */
+        INA22X_REG_CONFIGURATION=0x00,          /**< Configuration register. */
+        INA22X_REG_SHUNT_VOLTAGE,               /**< Shunt voltage register. */
+        INA22X_REG_BUS_VOLTAGE,                 /**< Bus voltage register. */
+        INA22X_REG_POWER,                       /**< Power register. */
+        INA22X_REG_CURRENT,                     /**< Current register. */
+        INA22X_REG_CALIBRATION,                 /**< Calibration register. */
+        INA22X_REG_MASK_ENABLE,                 /**< Mask/Enable register. */
+        INA22X_REG_ALERT_LIMIT,                 /**< Alert limit register. */
+        INA22X_REG_MANUFACTURER_ID=0xFE,        /**< Manufacturer ID register. */
+        INA22X_REG_DIE_ID,                      /**< Die ID register. */
+} ina22x_register_t;
 
 /**
  * \brief INA22x average mode samples.
@@ -134,16 +129,11 @@ typedef enum
 } ina22x_voltage_device_t;
 
 /**
- * \brief INA22x register type.
- */
-typedef uint8_t ina22x_reg_t;
-
-/**
  * \brief INA22x current, voltage and power types.
  */
-typedef int16_t ina22x_current_t;
+typedef float ina22x_current_t;
 typedef float ina22x_voltage_t;
-typedef int16_t ina22x_power_t;
+typedef float ina22x_power_t;
 
 /**
  * \brief INA22x ID type.
@@ -223,7 +213,7 @@ int ina22x_calibration(ina22x_config_t config);
  *
  * \return The status/error code.
  */
-int ina22x_write_reg(ina22x_config_t config, ina22x_reg_t reg, uint16_t val);
+int ina22x_write_reg(ina22x_config_t config, ina22x_register_t reg, uint16_t val);
 
 /**
  * \brief Reads the value of a given register.
@@ -249,79 +239,10 @@ int ina22x_write_reg(ina22x_config_t config, ina22x_reg_t reg, uint16_t val);
  *
  * \return The status/error code.
  */
-int ina22x_read_reg(ina22x_config_t config, ina22x_reg_t reg, uint16_t *val);
+int ina22x_read_reg(ina22x_config_t config, ina22x_register_t reg, uint16_t *val);
 
 /**
- * \brief Reads the current from the device without conversion.
- *
- * \param[in] config is configuration parameters of the driver.
- *
- * \param[in,out] cur is a pointer to store the read current.
- *
- * \return The status/error code.
- */
-int ina22x_get_current_raw(ina22x_config_t config, uint16_t *cur);
-
-/**
- * \brief Reads the voltage from the device without conversion.
- *
- * \param[in] config is configuration parameters of the driver.
- *
- * \param[in,out] volt is a pointer to store the read raw voltage.
- *
- * \return The status/error code.
- */
-int ina22x_get_voltage_raw(ina22x_config_t config, ina22x_voltage_device_t device, uint16_t *volt);
-
-/**
- * \brief Reads the power from the device without conversion.
- *
- * \param[in] config is configuration parameters of the driver.
- *
- * \param[in,out] pwr is a pointer to store the read raw power.
- *
- * \return The status/error code.
- */
-int ina22x_get_power_raw(ina22x_config_t config, uint16_t *pwr);
-
-/**
- * \brief Converts the read raw value to miliAmperes.
- *
- * \param[in] config is configuration parameters of the driver.
- *
- * \param[in] cur is the raw current to convert.
- *
- * \return The converted current in miliAmperes.
- */
-ina22x_current_t ina22x_convert_raw_to_mA(ina22x_config_t config, uint16_t cur);
-
-
-/**
- * \brief Converts the read raw value to miliVolts.
- *
- * \param[in] config is configuration parameters of the driver.
- *
- * \param[in] volt is the raw voltage to convert.
- *
- * \return The converted voltage in miliVolts.
- */
-ina22x_voltage_t ina22x_convert_raw_to_mV(ina22x_config_t config, ina22x_voltage_device_t device, uint16_t volt);
-
-/**
- * \brief Converts the read raw value to miliWatts.
- *
- * \param[in] config is configuration parameters of the driver.
- *
- * \param[in] device is the parameter to define if the voltage is from bus or shunt.
- *
- * \param[in] pwr is the raw power to convert.
- *
- * \return The converted power in miliWatts.
- */
-ina22x_power_t ina22x_convert_raw_to_mW(ina22x_config_t config, uint16_t pwr);
-
-/**
- * \brief Reads the current from the device converting to miliAmperes.
+ * \brief Reads the current from the device converting to Amperes.
  *
  * \param[in] config is configuration parameters of the driver.
  *
@@ -329,10 +250,10 @@ ina22x_power_t ina22x_convert_raw_to_mW(ina22x_config_t config, uint16_t pwr);
  *
  * \return The status/error code.
  */
-int ina22x_get_current_mA(ina22x_config_t config, ina22x_current_t *cur);
+int ina22x_get_current_A(ina22x_config_t config, ina22x_current_t *cur);
 
 /**
- * \brief Reads the voltage from the device converting to miliVolts.
+ * \brief Reads the voltage from the device converting to Volts.
  *
  * \param[in] config is configuration parameters of the driver.
  *
@@ -340,10 +261,10 @@ int ina22x_get_current_mA(ina22x_config_t config, ina22x_current_t *cur);
  *
  * \return The status/error code.
  */
-int ina22x_get_voltage_mV(ina22x_config_t config, ina22x_voltage_device_t device, ina22x_voltage_t *volt);
+int ina22x_get_voltage_V(ina22x_config_t config, ina22x_voltage_device_t device, ina22x_voltage_t *volt);
 
 /**
- * \brief Reads the power from the device converting to miliWatts.
+ * \brief Reads the power from the device converting to Watts.
  *
  * \param[in] config is configuration parameters of the driver.
  *
@@ -351,7 +272,7 @@ int ina22x_get_voltage_mV(ina22x_config_t config, ina22x_voltage_device_t device
  *
  * \return The status/error code.
  */
-int ina22x_get_power_mW(ina22x_config_t config, ina22x_power_t *pwr);
+int ina22x_get_power_W(ina22x_config_t config, ina22x_power_t *pwr);
 
 /**
  * \brief Reads the manufacturer ID.
@@ -362,6 +283,7 @@ int ina22x_get_power_mW(ina22x_config_t config, ina22x_power_t *pwr);
  *
  * \return The status/error code.
  */
+
 int ina22x_get_manufacturer_id(ina22x_config_t config, ina22x_id_t *id);
 
 /**

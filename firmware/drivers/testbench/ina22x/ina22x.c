@@ -28,18 +28,84 @@
  * 
  * \version 0.2.1
  * 
- * \date 2022/06/01
+ * \date 2022/07/19
  * 
  * \addtogroup ina22x
  * \{
  */
 
-#include <math.h>
-
 #include <system/sys_log/sys_log.h>
 #include <drivers/i2c/i2c.h>
 
 #include "ina22x.h"
+
+/**
+ * \brief Reads the current from the device without conversion.
+ *
+ * \param[in] config is configuration parameters of the driver.
+ *
+ * \param[in,out] cur is a pointer to store the read current.
+ *
+ * \return The status/error code.
+ */
+static int ina22x_get_current_raw(ina22x_config_t config, uint16_t *cur);
+
+/**
+ * \brief Reads the voltage from the device without conversion.
+ *
+ * \param[in] config is configuration parameters of the driver.
+ *
+ * \param[in,out] volt is a pointer to store the read raw voltage.
+ *
+ * \return The status/error code.
+ */
+static int ina22x_get_voltage_raw(ina22x_config_t config, ina22x_voltage_device_t device, uint16_t *volt);
+
+/**
+ * \brief Reads the power from the device without conversion.
+ *
+ * \param[in] config is configuration parameters of the driver.
+ *
+ * \param[in,out] pwr is a pointer to store the read raw power.
+ *
+ * \return The status/error code.
+ */
+static int ina22x_get_power_raw(ina22x_config_t config, uint16_t *pwr);
+
+/**
+ * \brief Converts the read raw value to Amperes.
+ *
+ * \param[in] config is configuration parameters of the driver.
+ *
+ * \param[in] cur is the raw current to convert.
+ *
+ * \return The converted current in Amperes.
+ */
+static ina22x_current_t ina22x_convert_raw_to_A(ina22x_config_t config, uint16_t cur);
+
+/**
+ * \brief Converts the read raw value to Volts.
+ *
+ * \param[in] config is configuration parameters of the driver.
+ *
+ * \param[in] volt is the raw voltage to convert.
+ *
+ * \return The converted voltage in Volts.
+ */
+static ina22x_voltage_t ina22x_convert_raw_to_V(ina22x_voltage_device_t device, uint16_t volt);
+
+/**
+ * \brief Converts the read raw value to Watts.
+ *
+ * \param[in] config is configuration parameters of the driver.
+ *
+ * \param[in] device is the parameter to define if the voltage is from bus or shunt.
+ *
+ * \param[in] pwr is the raw power to convert.
+ *
+ * \return The converted power in Watts.
+ */
+static ina22x_power_t ina22x_convert_raw_to_W(ina22x_config_t config, uint16_t pwr);
 
 int ina22x_init(ina22x_config_t config)
 {
@@ -76,11 +142,10 @@ int ina22x_configuration(ina22x_config_t config)
     int err = -1;
     uint16_t config_mask = 0x0000;
 
-    config_mask |= (config.avg_mode << 9);                /* Bits [11:9] */
-    config_mask |= (config.bus_voltage_conv_time << 6);   /* Bits [8:6] */
-    config_mask |= (config.shunt_voltage_conv_time << 3); /* Bits [5:3] */
-    config_mask |= config.op_mode;                        /* Bits [2:0] */
-
+    config_mask |= ((uint16_t) config.avg_mode << 9);                /* Bits [11:9] */
+    config_mask |= ((uint16_t) config.bus_voltage_conv_time << 6);   /* Bits [8:6] */
+    config_mask |= ((uint16_t) config.shunt_voltage_conv_time << 3); /* Bits [5:3] */
+    config_mask |= (uint16_t) config.op_mode;                        /* Bits [2:0] */
 
     if (ina22x_write_reg(config, INA22X_REG_CONFIGURATION, config_mask) == 0)
     {
@@ -101,10 +166,7 @@ int ina22x_calibration(ina22x_config_t config)
 {
     int err = 0;
     uint16_t calib_reg = 0;
-
     calib_reg = (uint16_t) config.cal;
-
-    //config.lsb_current = 0.00512 /(0.1 * (float) calib_reg);
 
     if (ina22x_write_reg(config, INA22X_REG_CALIBRATION, calib_reg) == -1)
     {
@@ -118,10 +180,9 @@ int ina22x_calibration(ina22x_config_t config)
     return err;
 }
 
-int ina22x_write_reg(ina22x_config_t config, ina22x_reg_t reg, uint16_t val)
+int ina22x_write_reg(ina22x_config_t config, ina22x_register_t reg, uint16_t val)
 {
     int err = 0;
-
     uint8_t buf[3] = 0;
     buf[0] = reg;
     buf[1] = val >> 8;
@@ -139,11 +200,11 @@ int ina22x_write_reg(ina22x_config_t config, ina22x_reg_t reg, uint16_t val)
     return err;
 }
 
-int ina22x_read_reg(ina22x_config_t config, ina22x_reg_t reg, uint16_t *val)
+int ina22x_read_reg(ina22x_config_t config, ina22x_register_t reg, uint16_t *val)
 {
-    uint8_t buf[2];
-
     int err = -1;
+    uint8_t buf[2] = 0;
+
     if (i2c_write(config.i2c_port, config.i2c_adr, &reg, 1) == 0)
     {
         if (i2c_read(config.i2c_port, config.i2c_adr, buf, 2) == 0)
@@ -170,7 +231,7 @@ int ina22x_read_reg(ina22x_config_t config, ina22x_reg_t reg, uint16_t *val)
     return err;
 }
 
-int ina22x_get_current_raw(ina22x_config_t config, uint16_t *cur)
+static int ina22x_get_current_raw(ina22x_config_t config, uint16_t *cur)
 {
     int err = -1;
     uint16_t current_reg;
@@ -194,7 +255,7 @@ int ina22x_get_current_raw(ina22x_config_t config, uint16_t *cur)
     return err;
 }
 
-int ina22x_get_voltage_raw(ina22x_config_t config, ina22x_voltage_device_t device, uint16_t *volt)
+static int ina22x_get_voltage_raw(ina22x_config_t config, ina22x_voltage_device_t device, uint16_t *volt)
 {
     int err = -1;
     uint16_t target_reg = 0U;
@@ -232,7 +293,7 @@ int ina22x_get_voltage_raw(ina22x_config_t config, ina22x_voltage_device_t devic
     return err;
 }
 
-int ina22x_get_power_raw(ina22x_config_t config, uint16_t *pwr)
+static int ina22x_get_power_raw(ina22x_config_t config, uint16_t *pwr)
 {
     int err = -1;
     uint16_t power_reg;
@@ -256,14 +317,14 @@ int ina22x_get_power_raw(ina22x_config_t config, uint16_t *pwr)
     return err;
 }
 
-ina22x_current_t ina22x_convert_raw_to_mA(ina22x_config_t config, uint16_t cur)
+static ina22x_current_t ina22x_convert_raw_to_A(ina22x_config_t config, uint16_t cur)
 {
-    return (cur * config.lsb_current * 1000);
+    return (cur * config.lsb_current);
 }
 
-ina22x_voltage_t ina22x_convert_raw_to_mV(ina22x_config_t config, ina22x_voltage_device_t device, uint16_t volt)
+ina22x_voltage_t ina22x_convert_raw_to_V(ina22x_voltage_device_t device, uint16_t volt)
 {
-    ina22x_voltage_t voltage = 0;
+    ina22x_voltage_t voltage = 0.0;
 
     switch(device)
     {
@@ -277,16 +338,16 @@ ina22x_voltage_t ina22x_convert_raw_to_mV(ina22x_config_t config, ina22x_voltage
             break;
     }
 
-    return voltage * 1000;
+    return voltage;
 }
 
 
-ina22x_power_t ina22x_convert_raw_to_mW(ina22x_config_t config, uint16_t pwr)
+static ina22x_power_t ina22x_convert_raw_to_W(ina22x_config_t config, uint16_t pwr)
 {
-    return (pwr * 25 * config.lsb_current * 1000);
+    return ((float) pwr * 25.0 * config.lsb_current);
 }
 
-int ina22x_get_current_mA(ina22x_config_t config, ina22x_current_t *cur)
+int ina22x_get_current_A(ina22x_config_t config, ina22x_current_t *cur)
 {
     int err = -1;
     uint16_t cur_reg = UINT16_MAX;
@@ -294,6 +355,7 @@ int ina22x_get_current_mA(ina22x_config_t config, ina22x_current_t *cur)
     if (ina22x_get_current_raw(config, &cur_reg) == 0)
     {
         err = 0;
+        *cur = ina22x_convert_raw_to_A(config, cur_reg);
     }
     else
     {
@@ -303,13 +365,11 @@ int ina22x_get_current_mA(ina22x_config_t config, ina22x_current_t *cur)
     #endif /* CONFIG_DRIVERS_DEBUG_ENABLED */
     }
 
-    *cur = ina22x_convert_raw_to_mA(config, cur_reg);
-
     return err;
 }
 
 
-int ina22x_get_voltage_mV(ina22x_config_t config, ina22x_voltage_device_t device, ina22x_voltage_t *volt)
+int ina22x_get_voltage_V(ina22x_config_t config, ina22x_voltage_device_t device, ina22x_voltage_t *volt)
 {
     int err = -1;
     uint16_t voltage_reg = 0;
@@ -317,7 +377,7 @@ int ina22x_get_voltage_mV(ina22x_config_t config, ina22x_voltage_device_t device
     if (ina22x_get_voltage_raw(config, device, &voltage_reg) == 0)
     {
         err = 0;
-        *volt = ina22x_convert_raw_to_mV(config, device, voltage_reg);
+        *volt = ina22x_convert_raw_to_V(device, voltage_reg);
     }
     else
     {
@@ -330,7 +390,7 @@ int ina22x_get_voltage_mV(ina22x_config_t config, ina22x_voltage_device_t device
     return err;
 }
 
-int ina22x_get_power_mW(ina22x_config_t config, ina22x_power_t *pwr)
+int ina22x_get_power_W(ina22x_config_t config, ina22x_power_t *pwr)
 {
     int err = -1;
     uint16_t power_reg = UINT16_MAX;
@@ -338,7 +398,7 @@ int ina22x_get_power_mW(ina22x_config_t config, ina22x_power_t *pwr)
     if (ina22x_get_power_raw(config, &power_reg) == 0)
     {
         err = 0;
-        *pwr = ina22x_convert_raw_to_mW(config, power_reg);
+        *pwr = ina22x_convert_raw_to_W(config, power_reg);
     }
     else
     {
