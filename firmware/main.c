@@ -56,7 +56,7 @@ void main(void)
     clk_conf.smclk_hz   = 32000000UL;
     clk_conf.aclk_hz    = 32768;
 
-    int err = clocks_setup(clk_conf);
+    //int err = clocks_setup(clk_conf);
 
     ina22x_config_t config;
     config.i2c_port = I2C_PORT_1;
@@ -96,10 +96,10 @@ void main(void)
     uint16_t raw_volt_bus = 0xFFFF;
     uint16_t raw_pwr = 0xFFFF;
 
-    ina22x_current_t mcur = 0xFFFF;
-    ina22x_voltage_t mvolt_shunt = 0xFFFF;
-    ina22x_voltage_t mvolt_bus = 0xFFFF;
-    ina22x_power_t mpwr = 0xFFFF;
+    ina22x_current_t Ccur = 0xFFFF;
+    ina22x_voltage_t Cvolt_shunt = 0xFFFF;
+    ina22x_voltage_t Cvolt_bus = 0xFFFF;
+    ina22x_power_t Cpwr = 0xFFFF;
 
 
     /* Initialize the ina22x */
@@ -149,23 +149,23 @@ void main(void)
 
     /* Read all raw measurements with functions */
 
-    ina22x_get_current_raw(config, &raw_cur);
+    //ina22x_get_current_raw(config, &raw_cur);
 
-    ina22x_get_voltage_raw(config, INA22X_SHUNT_VOLTAGE, &raw_volt_shunt);
+    //ina22x_get_voltage_raw(config, INA22X_SHUNT_VOLTAGE, &raw_volt_shunt);
 
-    ina22x_get_voltage_raw(config, INA22X_BUS_VOLTAGE, &raw_volt_bus);
+    //ina22x_get_voltage_raw(config, INA22X_BUS_VOLTAGE, &raw_volt_bus);
 
-    ina22x_get_power_raw(config, &raw_pwr);
+    //ina22x_get_power_raw(config, &raw_pwr);
 
     /* Read measurements in mili */
 
-    ina22x_get_current_mA(config, &mcur);
+    ina22x_get_current_A(config, &Ccur);
 
-    ina22x_get_voltage_mV(config, INA22X_SHUNT_VOLTAGE, &mvolt_shunt);
+    ina22x_get_voltage_V(config, INA22X_SHUNT_VOLTAGE, &Cvolt_shunt);
 
-    ina22x_get_voltage_mV(config, INA22X_BUS_VOLTAGE, &mvolt_bus);
+    ina22x_get_voltage_V(config, INA22X_BUS_VOLTAGE, &Cvolt_bus);
 
-    ina22x_get_power_mW(config, &mpwr);
+    ina22x_get_power_W(config, &Cpwr);
 
 
 
