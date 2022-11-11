@@ -25,7 +25,7 @@
  * 
  * \author Gabriel Mariano Marcelino <gabriel.mm8@gmail.com>
  * 
- * \version 0.1.20
+ * \version 0.2.3
  * 
  * \date 2019/10/26
  * 
@@ -49,6 +49,7 @@
 
 /* Debug and log messages */
 #define CONFIG_DRIVERS_DEBUG_ENABLED                    0
+#define CONFIG_DEVICE_LEDS_ENABLED                      1
 
 #define CONFIG_SATELLITE_CALLSIGN                       " PY0EFS"
 

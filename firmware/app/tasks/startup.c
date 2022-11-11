@@ -25,7 +25,7 @@
  * 
  * \author Gabriel Mariano Marcelino <gabriel.mm8@gmail.com>
  * 
- * \version 0.1.20
+ * \version 0.2.3
  * 
  * \date 2019/12/04
  * 
@@ -39,10 +39,17 @@
 #include <system/sys_log/sys_log.h>
 #include <system/clocks.h>
 #include <devices/watchdog/watchdog.h>
+#include <devices/leds/leds.h>
+#include <devices/radio/radio.h>
+#include <devices/power_sensor/power_sensor.h>
+#include <devices/temp_sensor/temp_sensor.h>
+#include <devices/antenna/antenna.h>
+#include <devices/media/media.h>
 
 #include <ngham/ngham.h>
 
 #include "startup.h"
+
 
 xTaskHandle xTaskStartupHandle;
 
@@ -52,8 +59,13 @@ void vTaskStartup(void)
 {
     unsigned int error_counter = 0;
 
+
+
     /* Logger device initialization */
     sys_log_init();
+
+
+
 
     /* Print the FreeRTOS version */
     sys_log_print_event_from_module(SYS_LOG_INFO, TASK_STARTUP_NAME, "FreeRTOS ");
@@ -81,18 +93,98 @@ void vTaskStartup(void)
     sys_log_print_hex(system_get_reset_cause());
     sys_log_new_line();
 
+
+    voltage_t ind_volt_uc_shunt = 0;
+    voltage_t ind_volt_uc_bus = 0;
+
+    voltage_t ind_volt_radio_shunt = 0;
+    voltage_t ind_volt_radio_bus = 0;
+
+    current_t ind_curr_uc = 0;
+    current_t ind_curr_radio = 0;
+
+    power_t   ind_power_uc = 0;
+    power_t   ind_power_radio = 0;
+
+    power_sensor_data_t data_uc;
+    power_sensor_data_t data_radio;
+
+    /* Initialize power sensor */
+    error_counter = power_sensor_init();
+
+    /*Check individual voltage */
+    error_counter = power_sensor_read_voltage(POWER_SENSOR_UC, POWER_SENSOR_MILI_SCALE, POWER_SENSOR_MILI_SCALE, &ind_volt_uc_shunt, &ind_volt_uc_bus);
+    error_counter = power_sensor_read_voltage(POWER_SENSOR_RADIO, POWER_SENSOR_MILI_SCALE, POWER_SENSOR_MILI_SCALE, &ind_volt_radio_shunt, &ind_volt_radio_bus);
+    vTaskDelay(500);
+    /* Check individual curr */
+    error_counter = power_sensor_read_current(POWER_SENSOR_UC, POWER_SENSOR_MILI_SCALE, &ind_curr_uc);
+    error_counter = power_sensor_read_current(POWER_SENSOR_RADIO, POWER_SENSOR_MILI_SCALE, &ind_curr_radio);
+    vTaskDelay(500);
+    /* Check individual power */
+    error_counter = power_sensor_read_power(POWER_SENSOR_UC, POWER_SENSOR_MILI_SCALE, &ind_power_uc);
+    error_counter = power_sensor_read_power(POWER_SENSOR_RADIO, POWER_SENSOR_MILI_SCALE, &ind_power_radio);
+    vTaskDelay(500);
+    /* Check read function */
+    power_sensor_read(POWER_SENSOR_UC, &data_uc);
+    power_sensor_read(POWER_SENSOR_RADIO, &data_radio);
+
+    /* Internal non-volatile memory initialization */
+    if (media_init(MEDIA_INT_FLASH) != 0)
+    {
+        error_counter++;
+    }
+
+    /* LEDs device initialization */
+#if defined(CONFIG_DEVICE_LEDS_ENABLED) && (CONFIG_DEVICE_LEDS_ENABLED)
+    if (leds_init() != 0)
+    {
+        error_counter++;
+    }
+#endif /* CONFIG_DEVICE_LEDS_ENABLED */
+
+    /* Power sensor device initialization */
+    if (power_sensor_init() != 0)
+    {
+        error_counter++;
+    }
+
+    /* Temperature sensor device initialization */
+    if (temp_sensor_init() != 0)
+    {
+        error_counter++;
+    }
+
+    /* Radio device initialization */
+    if (radio_init() != 0)
+    {
+        error_counter++;
+    }
+
+    /* NGHam initialization */
+    ngham_init_arrays();
+    ngham_init();
+
+    /* Antenna device initialization */
+    if (antenna_init() != 0)
+    {
+        error_counter++;
+    }
+
     if (error_counter > 0U)
     {
         sys_log_print_event_from_module(SYS_LOG_ERROR, TASK_STARTUP_NAME, "Boot completed with ");
         sys_log_print_uint(error_counter);
         sys_log_print_msg(" ERROR(S)!");
         sys_log_new_line();
+
+        led_set(LED_FAULT);
     }
     else
     {
         sys_log_print_event_from_module(SYS_LOG_INFO, TASK_STARTUP_NAME, "Boot completed with SUCCESS!");
         sys_log_new_line();
 
+        led_clear(LED_FAULT);
     }
 
     /* Startup task status = Done */

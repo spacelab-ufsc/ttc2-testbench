@@ -43,8 +43,8 @@
 void main(void)
 {
     /* Watchdog device initialization */
-    int err = watchdog_init();
-
+    int err = 0; // watchdog_init();
+    WDTCTL = WDTPW | WDTHOLD;   // stop watchdog timer
     /* System clocks configuration */
     clocks_config_t clk_conf = {0};
 
@@ -52,7 +52,7 @@ void main(void)
     clk_conf.smclk_hz   = 32000000UL;
     clk_conf.aclk_hz    = 32768;
 
-    err = clocks_setup(clk_conf);
+   // err = clocks_setup(clk_conf);
 
     /* Create all the tasks */
     create_tasks();
