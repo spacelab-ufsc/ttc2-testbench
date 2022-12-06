@@ -40,10 +40,14 @@
 #include "system/clocks.h"
 #include "app/tasks/tasks.h"
 
+#include <drivers/spi_slave/spi_slave.h>
+#include <drivers/uart/uart.h>
+
 void main(void)
 {
+    int err = -1;
     /* Watchdog device initialization */
-    int err = watchdog_init();
+    WDTCTL = WDTPW | WDTHOLD;   // stop watchdog timer
 
     /* System clocks configuration */
     clocks_config_t clk_conf = {0};
@@ -54,6 +58,26 @@ void main(void)
 
     err = clocks_setup(clk_conf);
 
+    uart_config_t config;
+
+    config.baudrate     = 115200;
+    config.data_bits    = 8;
+    config.parity       = UART_NO_PARITY;
+    config.stop_bits    = UART_ONE_STOP_BIT;
+
+    err = uart_init(UART_PORT_0, config);
+    uint8_t msg[] = {'H', 'e', 'l', 'l', 'o', '!'};
+
+    err = uart_write(UART_PORT_0, msg, 6);
+
+    err = uart_rx_enable(UART_PORT_0);
+
+    while(uart_read_available(UART_PORT_0) == 0);
+
+    while(1)
+    {
+        uart_write(UART_PORT_0, msg, 6);
+    }
     /* Create all the tasks */
     create_tasks();
 

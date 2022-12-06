@@ -1,5 +1,5 @@
 /* ============================================================================ */
-/* Copyright (c) 2019, Texas Instruments Incorporated                           */
+/* Copyright (c) 2020, Texas Instruments Incorporated                           */
 /*  All rights reserved.                                                        */
 /*                                                                              */
 /*  Redistribution and use in source and binary forms, with or without          */
@@ -31,7 +31,7 @@
 /* ============================================================================ */
 
 /******************************************************************************/
-/* lnk_msp430f6659.cmd - LINKER COMMAND FILE FOR LINKING MSP430F6659 PROGRAMS     */
+/* lnk_msp430f5659.cmd - LINKER COMMAND FILE FOR LINKING MSP430F5659 PROGRAMS     */
 /*                                                                            */
 /*   Usage:  lnk430 <obj files...>    -o <out file> -m <map file> lnk.cmd     */
 /*           cl430  <src files...> -z -o <out file> -m <map file> lnk.cmd     */
@@ -44,7 +44,7 @@
 /* -heap   0x0100                                   HEAP AREA SIZE            */
 /*                                                                            */
 /*----------------------------------------------------------------------------*/
-/* Version: 1.207                                                             */
+/* Version: 1.213                                                             */
 /*----------------------------------------------------------------------------*/
 
 /****************************************************************************/
@@ -64,7 +64,7 @@ MEMORY
     INFOC                   : origin = 0x1880, length = 0x0080
     INFOD                   : origin = 0x1800, length = 0x0080
     FLASH                   : origin = 0x8000, length = 0x7F80
-    FLASH2                  : origin = 0x10000,length = 0x78000
+    FLASH2                  : origin = 0x10000,length = 0x77FF8 /* Boundaries changed to fix CPU47 */
     INT00                   : origin = 0xFF80, length = 0x0002
     INT01                   : origin = 0xFF82, length = 0x0002
     INT02                   : origin = 0xFF84, length = 0x0002
@@ -221,7 +221,7 @@ SECTIONS
     TIMER2_A0    : { * ( .int40 ) } > INT40 type = VECT_INIT
     DAC12        : { * ( .int41 ) } > INT41 type = VECT_INIT
     RTC          : { * ( .int42 ) } > INT42 type = VECT_INIT
-    LCD_B        : { * ( .int43 ) } > INT43 type = VECT_INIT
+    .int43       : {}               > INT43
     PORT2        : { * ( .int44 ) } > INT44 type = VECT_INIT
     USCI_B1      : { * ( .int45 ) } > INT45 type = VECT_INIT
     USCI_A1      : { * ( .int46 ) } > INT46 type = VECT_INIT
@@ -248,5 +248,5 @@ SECTIONS
 /* Include peripherals memory map                                           */
 /****************************************************************************/
 
--l msp430f6659.cmd
+-l msp430f5659.cmd
 

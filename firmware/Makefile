@@ -1,7 +1,7 @@
 TARGET=ttc2
 CCS_WORKSPACE=$(HOME)/workspace_v9
 
-DEV_CONFIG_FILE=targetConfigs/MSP430F6659.ccxml
+DEV_CONFIG_FILE=targetConfigs/MSP430F5659.ccxml
 IMG=Debug/$(TARGET).out
 
 CC=$(HOME)/ti/ccs920/ccs/eclipse/./ccstudio

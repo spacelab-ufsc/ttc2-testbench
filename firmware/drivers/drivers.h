@@ -37,11 +37,16 @@
 #define DRIVERS_H_
 
 #include "i2c/i2c.h"
+#include "isis_antenna/isis_antenna.h"
 #include "spi/spi.h"
-#include "spi_slave/spi_slave.h"
+#include "si446x/si446x.h"
 #include "uart/uart.h"
 #include "gpio/gpio.h"
 #include "wdt/wdt.h"
+#include "adc/adc.h"
+#include "flash/flash.h"
+#include "ina22x/ina22x.h"
+#include "tca4311a/tca4311a.h"
 
 #endif /* DRIVERS_H_ */
 
